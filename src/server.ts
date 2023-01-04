@@ -40,7 +40,7 @@ async function requireAuth(req: Request, res: Response, next: NextFunction) {
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
 
-  // @TODO1 IMPLEMENT A RESTFUL ENDPOINT
+  // @TODO1 IMPLEMENT A RESTFUL ENDPOINT - DONE!!! 😀
   // GET /filteredimage?image_url={{URL}}
   // endpoint to filter an image from a public url.
   // IT SHOULD
@@ -63,7 +63,7 @@ async function requireAuth(req: Request, res: Response, next: NextFunction) {
 
       // validates image_url
       if (!image_url) {
-        return res.status(400).send({ message: "image url query is required" });
+        return res.status(401).send({ message: "image url query is required" });
       }
 
       try {
@@ -73,14 +73,15 @@ async function requireAuth(req: Request, res: Response, next: NextFunction) {
         // sends file response and deletes file when completed
         return res.sendFile(filtered_path, (err) => {
           if (err) {
-            res.status(500).send({ message: "could not send file" });
+            return res.status(500).send({ message: "could not send file" });
           } else {
             deleteLocalFiles([filtered_path]);
           }
         });
-      } catch {
+      } catch (error) {
+        console.log("process error", error);
         // handle image processing error
-        return res.status(500).send({ message: "could not process image" });
+        return res.status(422).send({ message: "could not process image" });
       }
     }
   );
