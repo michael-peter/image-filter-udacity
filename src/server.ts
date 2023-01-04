@@ -40,7 +40,7 @@ async function requireAuth(req: Request, res: Response, next: NextFunction) {
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
 
-  // @TODO1 IMPLEMENT A RESTFUL ENDPOINT
+  // @TODO1 IMPLEMENT A RESTFUL ENDPOINT - DONE!!! 😀
   // GET /filteredimage?image_url={{URL}}
   // endpoint to filter an image from a public url.
   // IT SHOULD
