@@ -6,21 +6,12 @@
 	},
 	"item": [
 		{
-			"name": "http://localhost:8082/filteredimage?image_url=https://timedotcom.files.wordpress.com/2019/03/kitten-report.jpg",
+			"name": "/filteredimage?image_url=https://timedotcom.files.wordpress.com/2019/03/kitten-report.jpg",
 			"request": {
-				"auth": {
-					"type": "noauth"
-				},
 				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer J8Uig6atrOLFHuianHauKe997HgWCsSE7",
-						"type": "default"
-					}
-				],
+				"header": [],
 				"url": {
-					"raw": "http://{{HOST}}/filteredimage?image_url=https://img.freepik.com/free-photo/group-elephants-big-green-tree-wilderness_181624-16897.jpg",
+					"raw": "http://{{HOST}}/filteredimage?image_url=https://upload.wikimedia.org/wikipedia/commons/b/bd/Golden_tabby_and_white_kitten_n01.jpg",
 					"protocol": "http",
 					"host": [
 						"{{HOST}}"
@@ -31,7 +22,7 @@
 					"query": [
 						{
 							"key": "image_url",
-							"value": "https://img.freepik.com/free-photo/group-elephants-big-green-tree-wilderness_181624-16897.jpg"
+							"value": "https://upload.wikimedia.org/wikipedia/commons/b/bd/Golden_tabby_and_white_kitten_n01.jpg"
 						}
 					]
 				}
@@ -39,17 +30,16 @@
 			"response": []
 		},
 		{
-			"name": "http://localhost:8082",
+			"name": "/",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8082",
+					"raw": "http://{{HOST}}",
 					"protocol": "http",
 					"host": [
-						"localhost"
-					],
-					"port": "8082"
+						"{{HOST}}"
+					]
 				}
 			},
 			"response": []
