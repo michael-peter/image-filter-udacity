@@ -29,13 +29,28 @@ import { filterImageFromURL, deleteLocalFiles } from "./util/util";
   /**************************************************************************** */
   app.get("/filteredimage", async (req: Request, res: Response) => {
     const { image_url } = req.query;
+
+    // validates image_url
     if (!image_url) {
       return res.status(400).send({ message: "image url query is required" });
     }
 
-    const filtered_path = await filterImageFromURL(image_url as string);
+    try {
+      // filters image
+      const filtered_path = await filterImageFromURL(image_url as string);
 
-    return res.sendFile(filtered_path);
+      // sends file response and deletes file when completed
+      return res.sendFile(filtered_path, (err) => {
+        if (err) {
+          res.status(500).send({ message: "could not send file" });
+        } else {
+          deleteLocalFiles([filtered_path]);
+        }
+      });
+    } catch {
+      // handle image processing error
+      return res.status(500).send({ message: "could not process image" });
+    }
   });
 
   //! END @TODO1
