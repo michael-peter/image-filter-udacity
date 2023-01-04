@@ -1,6 +1,34 @@
-import express, { Request, Response } from "express";
+import * as dotenv from "dotenv";
+dotenv.config();
+
+import express, { NextFunction, Request, Response } from "express";
 import bodyParser from "body-parser";
 import { filterImageFromURL, deleteLocalFiles } from "./util/util";
+
+// middleware for authentication
+async function requireAuth(req: Request, res: Response, next: NextFunction) {
+  const headers = req.headers;
+
+  if (!headers || !headers.authorization) {
+    return res
+      .status(401)
+      .send({ message: "authorization header is required" });
+  }
+
+  const token_bearer = req.headers.authorization.split(" ");
+  if (token_bearer.length != 2) {
+    return res
+      .status(401)
+      .send({ message: "authorization header is not valid" });
+  }
+
+  const token = token_bearer[1];
+  if (token != process.env.SECRET_TOKEN) {
+    return res.status(401).send({ message: "token is incorrect" });
+  }
+
+  next();
+}
 
 (async () => {
   // Init the Express application
@@ -27,31 +55,35 @@ import { filterImageFromURL, deleteLocalFiles } from "./util/util";
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
 
   /**************************************************************************** */
-  app.get("/filteredimage", async (req: Request, res: Response) => {
-    const { image_url } = req.query;
+  app.get(
+    "/filteredimage",
+    requireAuth,
+    async (req: Request, res: Response) => {
+      const { image_url } = req.query;
 
-    // validates image_url
-    if (!image_url) {
-      return res.status(400).send({ message: "image url query is required" });
+      // validates image_url
+      if (!image_url) {
+        return res.status(400).send({ message: "image url query is required" });
+      }
+
+      try {
+        // filters image
+        const filtered_path = await filterImageFromURL(image_url as string);
+
+        // sends file response and deletes file when completed
+        return res.sendFile(filtered_path, (err) => {
+          if (err) {
+            res.status(500).send({ message: "could not send file" });
+          } else {
+            deleteLocalFiles([filtered_path]);
+          }
+        });
+      } catch {
+        // handle image processing error
+        return res.status(500).send({ message: "could not process image" });
+      }
     }
-
-    try {
-      // filters image
-      const filtered_path = await filterImageFromURL(image_url as string);
-
-      // sends file response and deletes file when completed
-      return res.sendFile(filtered_path, (err) => {
-        if (err) {
-          res.status(500).send({ message: "could not send file" });
-        } else {
-          deleteLocalFiles([filtered_path]);
-        }
-      });
-    } catch {
-      // handle image processing error
-      return res.status(500).send({ message: "could not process image" });
-    }
-  });
+  );
 
   //! END @TODO1
 
