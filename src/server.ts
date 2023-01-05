@@ -4,10 +4,11 @@ dotenv.config();
 import express, { NextFunction, Request, Response } from "express";
 import bodyParser from "body-parser";
 import { filterImageFromURL, deleteLocalFiles } from "./util/util";
+import { IncomingHttpHeaders } from "http";
 
 // middleware for authentication
 async function requireAuth(req: Request, res: Response, next: NextFunction) {
-  const headers = req.headers;
+  const headers: IncomingHttpHeaders = req.headers;
 
   if (!headers || !headers.authorization) {
     return res
@@ -15,14 +16,14 @@ async function requireAuth(req: Request, res: Response, next: NextFunction) {
       .send({ message: "authorization header is required" });
   }
 
-  const token_bearer = req.headers.authorization.split(" ");
+  const token_bearer: string[] = req.headers.authorization.split(" ");
   if (token_bearer.length != 2) {
     return res
       .status(401)
       .send({ message: "authorization header is not valid" });
   }
 
-  const token = token_bearer[1];
+  const token: string = token_bearer[1];
   if (token != process.env.SECRET_TOKEN) {
     return res.status(401).send({ message: "token is incorrect" });
   }
@@ -59,28 +60,29 @@ async function requireAuth(req: Request, res: Response, next: NextFunction) {
     "/filteredimage",
     requireAuth,
     async (req: Request, res: Response) => {
-      const { image_url } = req.query;
+      const { image_url }: { image_url?: string } = req.query;
 
       // validates image_url
       if (!image_url) {
-        return res.status(401).send({ message: "image url query is required" });
+        return res
+          .status(401)
+          .send({ message: "image_url query is required or malformed" });
       }
 
       try {
         // filters image
-        const filtered_path = await filterImageFromURL(image_url as string);
+        const filtered_path: string = await filterImageFromURL(image_url);
 
         // sends file response and deletes file when completed
-        return res.sendFile(filtered_path, (err) => {
+        return res.status(200).sendFile(filtered_path, (err: Error) => {
           if (err) {
             return res.status(500).send({ message: "could not send file" });
           } else {
             deleteLocalFiles([filtered_path]);
           }
         });
-      } catch (error) {
-        console.log("process error", error);
-        // handle image processing error
+      } catch {
+        // handles image processing error
         return res.status(422).send({ message: "could not process image" });
       }
     }

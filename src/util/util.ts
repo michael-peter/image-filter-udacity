@@ -1,5 +1,5 @@
 import fs from "fs";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import Jimp = require("jimp");
 
 // filterImageFromURL
@@ -14,7 +14,7 @@ export async function filterImageFromURL(inputURL: string): Promise<string> {
     try {
       // direct reading of inputURL in Jimp.read() failed for large files
       // using axios to pre-process inputURL
-      const buffer = await axios.get(inputURL, {
+      const buffer: AxiosResponse = await axios.get(inputURL, {
         responseType: "arraybuffer",
       });
       const photo = await Jimp.read(buffer.data);
